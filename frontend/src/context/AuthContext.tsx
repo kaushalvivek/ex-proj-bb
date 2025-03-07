@@ -15,7 +15,7 @@ interface AuthContextType {
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, panNumber?: string, phone?: string) => Promise<void>;
-  logout: () => void;
+  logout: (callback?: () => void) => void;
   updateUser: (userData: Partial<User>) => void;
 }
 
@@ -82,9 +82,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
+  const logout = (callback?: () => void) => {
     localStorage.removeItem('token');
     setUser(null);
+    
+    // If a callback function is provided, call it after logout
+    if (callback) {
+      callback();
+    }
   };
 
   const updateUser = (userData: Partial<User>) => {

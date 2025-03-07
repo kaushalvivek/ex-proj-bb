@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +10,12 @@ function classNames(...classes: string[]) {
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  
+  // Handle logout with redirect to home page
+  const handleLogout = () => {
+    logout(() => navigate('/'));
+  };
   
   const navigation = [
     { name: 'Dashboard', href: '/', current: true },
@@ -107,7 +113,7 @@ export default function Header() {
                           <Menu.Item>
                             {({ active }) => (
                               <button
-                                onClick={logout}
+                                onClick={handleLogout}
                                 className={classNames(
                                   active ? 'bg-gray-100' : '',
                                   'block w-full text-left px-4 py-2 text-sm text-gray-700'
@@ -196,7 +202,7 @@ export default function Header() {
                     </Disclosure.Button>
                     <Disclosure.Button
                       as="button"
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                     >
                       Sign out
