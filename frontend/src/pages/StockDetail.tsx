@@ -32,6 +32,7 @@ export default function StockDetail() {
   const [processing, setProcessing] = useState(false);
   const [tradeSuccess, setTradeSuccess] = useState<string | null>(null);
   const [tradeError, setTradeError] = useState<string | null>(null);
+  const [redirectTimeout, setRedirectTimeout] = useState<number | null>(null);
   
   useEffect(() => {
     const fetchStock = async () => {
@@ -54,6 +55,15 @@ export default function StockDetail() {
     
     fetchStock();
   }, [id]);
+  
+  useEffect(() => {
+    // Clear timeout on component unmount
+    return () => {
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
+    };
+  }, [redirectTimeout]);
   
   // Calculate total cost
   const totalCost = quantity * price;
@@ -92,6 +102,14 @@ export default function StockDetail() {
         // Update user balance
         updateUser({ balance: user.balance + totalCost });
       }
+      
+      // Set a timeout to redirect to portfolio page after successful transaction
+      const timeout = setTimeout(() => {
+        navigate('/portfolio');
+      }, 2000);
+      
+      setRedirectTimeout(timeout);
+      
     } catch (err: any) {
       console.error('Trade failed:', err);
       setTradeError(err.response?.data?.detail || 'Trade failed. Please try again.');
@@ -122,7 +140,7 @@ export default function StockDetail() {
         
         {loading ? (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-zerodha-blue border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-bigbull-blue border-t-transparent"></div>
             <p className="mt-2 text-gray-500">Loading stock details...</p>
           </div>
         ) : stock ? (
@@ -132,13 +150,13 @@ export default function StockDetail() {
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-2xl font-bold text-zerodha-dark">{stock.symbol}</h1>
+                    <h1 className="text-2xl font-bold text-bigbull-dark">{stock.symbol}</h1>
                     <p className="text-gray-500">{stock.name}</p>
                     <p className="text-sm text-gray-500 mt-1">{stock.exchange}</p>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-bold">₹{stock.current_price.toLocaleString()}</div>
-                    <div className={`flex items-center justify-end mt-1 ${isPositiveChange ? 'text-zerodha-green' : 'text-zerodha-red'}`}>
+                    <div className={`flex items-center justify-end mt-1 ${isPositiveChange ? 'text-bigbull-green' : 'text-bigbull-red'}`}>
                       {isPositiveChange ? (
                         <ArrowUpIcon className="h-4 w-4 mr-1" />
                       ) : (
@@ -202,7 +220,7 @@ export default function StockDetail() {
                       type="button"
                       className={`py-2 px-4 rounded-md ${
                         tradeType === 'BUY'
-                          ? 'bg-zerodha-green text-white'
+                          ? 'bg-bigbull-green text-white'
                           : 'bg-gray-100 text-gray-700'
                       }`}
                       onClick={() => setTradeType('BUY')}
@@ -213,7 +231,7 @@ export default function StockDetail() {
                       type="button"
                       className={`py-2 px-4 rounded-md ${
                         tradeType === 'SELL'
-                          ? 'bg-zerodha-red text-white'
+                          ? 'bg-bigbull-red text-white'
                           : 'bg-gray-100 text-gray-700'
                       }`}
                       onClick={() => setTradeType('SELL')}
@@ -273,8 +291,8 @@ export default function StockDetail() {
                   disabled={processing || !user}
                   className={`w-full py-2 px-4 rounded-md font-medium text-white ${
                     tradeType === 'BUY'
-                      ? 'bg-zerodha-green hover:bg-green-600'
-                      : 'bg-zerodha-red hover:bg-red-600'
+                      ? 'bg-bigbull-green hover:bg-green-600'
+                      : 'bg-bigbull-red hover:bg-red-600'
                   } disabled:opacity-50`}
                 >
                   {processing

@@ -100,28 +100,26 @@ npm install
 Open a Command Prompt window, navigate to the project directory, and run:
 
 ```bash
-# Activate the virtual environment if not already activated
-venv\Scripts\activate
-
-# Start the server (from the project root)
-python -m uvicorn backend.app.main:app --reload
+# IMPORTANT: You must run this command from the project root directory
+# Do not run it from inside the backend directory
+python -m backend.app.main
 ```
 
 The backend server will start running at `http://localhost:8000`.
 
 ### 2. Start the Frontend Development Server
 
-Open another Command Prompt window, navigate to the project directory, and run:
+Open another Command Prompt window, navigate to the frontend directory:
 
 ```bash
-# Navigate to the frontend directory
+# From the project root
 cd frontend
 
 # Start the development server
 npm run dev
 ```
 
-The frontend development server will start and display a URL (typically `http://localhost:5173` or similar) in the terminal.
+The frontend development server will start and display a URL (typically `http://localhost:5173`).
 
 ## Accessing the Application
 
@@ -132,7 +130,50 @@ The frontend development server will start and display a URL (typically `http://
 
 The API documentation is automatically generated and available at `http://localhost:8000/docs` when the backend server is running.
 
-## Troubleshooting Common Windows Issues
+## Troubleshooting Common Issues
+
+### Backend and Frontend Communication
+
+If the frontend can't communicate with the backend, verify these settings:
+
+1. **Check API Configuration**: Make sure the frontend API client in `frontend/src/api/api.ts` is configured correctly:
+   ```typescript
+   const api = axios.create({
+     baseURL: 'http://localhost:8000',  // Must use localhost, not 0.0.0.0
+     headers: {
+       'Content-Type': 'application/json',
+     },
+   });
+   ```
+
+2. **Test Backend API Directly**:
+   ```bash
+   # Test the root endpoint
+   curl -v http://localhost:8000/
+   
+   # Test a specific endpoint (like register)
+   curl -v http://localhost:8000/register -H 'Content-Type: application/json' \
+     --data-raw '{"name":"Test","email":"test@example.com","password":"testtest","pan_number":"","phone":""}'
+   ```
+
+3. **Browser Network Inspection**:
+   - Open browser developer tools (F12)
+   - Go to Network tab
+   - Look for failed requests to the backend
+   - Verify the request URL matches your backend address
+
+### Python Import Errors
+
+If you see a "No module named 'backend'" error, make sure you're running the backend from the project root directory, not from inside the backend directory.
+
+```bash
+# CORRECT: Run from project root
+python -m backend.app.main
+
+# INCORRECT: Don't run from inside the backend directory
+cd backend
+python -m app.main  # This will fail with import error
+```
 
 ### Port Already in Use
 
@@ -140,9 +181,10 @@ If you see an error like "Address already in use" when starting the server:
 
 ```bash
 # For backend, use a different port
-python -m uvicorn backend.app.main:app --reload --port 8001
+python -m backend.app.main --port 8001
 
 # For frontend, Vite will automatically try another port, or you can specify
+cd frontend
 npm run dev -- --port 5174
 ```
 
@@ -153,7 +195,7 @@ If Windows doesn't recognize the `python` command, try using `py` instead:
 ```bash
 py -m venv venv
 py -m pip install -r backend/requirements.txt
-py -m uvicorn backend.app.main:app --reload
+py -m backend.app.main
 ```
 
 ### Module Not Found Errors

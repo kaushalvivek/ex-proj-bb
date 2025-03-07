@@ -17,19 +17,23 @@ interface Holding {
   user_id: number;
   stock_id: number;
   quantity: number;
-  avg_buy_price: number;
+  average_price: number;
   stock: Stock;
 }
 
 interface PortfolioValueChartProps {
   holdings: Holding[];
-  totalPortfolioValue: number;
 }
 
 const PortfolioValueChart: FC<PortfolioValueChartProps> = ({ 
-  holdings, 
-  totalPortfolioValue 
+  holdings
 }) => {
+  // Calculate total portfolio value
+  const totalPortfolioValue = holdings.reduce(
+    (total, holding) => total + (holding.quantity * holding.stock.current_price), 
+    0
+  );
+
   // Colors for the chart
   const chartColors = [
     'rgba(0, 163, 137, 0.8)',      // Big Bull Green

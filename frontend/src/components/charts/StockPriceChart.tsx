@@ -23,22 +23,28 @@ ChartJS.register(
 );
 
 interface StockPriceChartProps {
-  stockId: number;
   stockSymbol: string;
   currentPrice: number;
-  previousClose: number;
+  dayHigh: number;
+  dayLow: number;
 }
 
 const StockPriceChart: FC<StockPriceChartProps> = ({
-  stockId,
   stockSymbol,
   currentPrice,
-  previousClose,
+  dayHigh,
+  dayLow,
 }) => {
+  // Add console log for debugging
+  console.log("StockPriceChart props:", { stockSymbol, currentPrice, dayHigh, dayLow });
+  
   const [activeTimeframe, setActiveTimeframe] = useState<string>('1D');
   const [chartData, setChartData] = useState<any>(null);
   const [priceChange, setPriceChange] = useState<number>(0);
   const [percentChange, setPercentChange] = useState<number>(0);
+
+  // Calculate approximate previous close based on day high and day low
+  const previousClose = currentPrice - ((dayHigh - dayLow) / 2);
 
   // Generate random price data based on current price and timeframe
   const generatePriceData = (timeframe: string) => {
@@ -192,7 +198,7 @@ const StockPriceChart: FC<StockPriceChartProps> = ({
         },
       ],
     });
-  }, [stockId, currentPrice, previousClose, activeTimeframe]);
+  }, [stockSymbol, currentPrice, previousClose, activeTimeframe, dayHigh, dayLow]);
 
   const options = {
     responsive: true,

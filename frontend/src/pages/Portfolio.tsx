@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
+import { ArrowUpIcon, ArrowDownIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../context/AuthContext';
 import { tradingAPI } from '../api/api';
 import Layout from '../components/Layout';
@@ -54,6 +54,7 @@ export default function Portfolio() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -79,7 +80,11 @@ export default function Portfolio() {
     };
     
     fetchPortfolio();
-  }, [user]);
+  }, [user, refreshKey]);
+  
+  const refreshPortfolio = () => {
+    setRefreshKey(prevKey => prevKey + 1);
+  };
   
   // Redirect to login if not authenticated
   if (!user) {
@@ -109,10 +114,20 @@ export default function Portfolio() {
     <Layout>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <h1 className="text-2xl font-bold text-zerodha-dark">My Portfolio</h1>
-          <Link to="/markets" className="btn btn-primary mt-4 md:mt-0">
-            Explore Markets
-          </Link>
+          <h1 className="text-2xl font-bold text-bigbull-dark">My Portfolio</h1>
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            <button 
+              onClick={refreshPortfolio} 
+              className="btn flex items-center space-x-2"
+              disabled={loading}
+            >
+              <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+            <Link to="/markets" className="btn btn-primary">
+              Explore Markets
+            </Link>
+          </div>
         </div>
         
         {error && (
@@ -123,7 +138,7 @@ export default function Portfolio() {
         
         {loading && (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-zerodha-blue border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-bigbull-blue border-t-transparent"></div>
             <p className="mt-2 text-gray-500">Loading your portfolio...</p>
           </div>
         )}
@@ -145,11 +160,11 @@ export default function Portfolio() {
               <div className="card">
                 <h2 className="text-xl font-semibold mb-2">P&L</h2>
                 <div className="flex items-center">
-                  <p className={`text-2xl font-bold ${portfolioSummary.pnl >= 0 ? 'text-zerodha-green' : 'text-zerodha-red'}`}>
+                  <p className={`text-2xl font-bold ${portfolioSummary.pnl >= 0 ? 'text-bigbull-green' : 'text-bigbull-red'}`}>
                     ₹{portfolioSummary.pnl.toLocaleString()}
                   </p>
                   {portfolioSummary.pnl !== 0 && (
-                    <span className={`ml-2 flex items-center ${portfolioSummary.pnl >= 0 ? 'text-zerodha-green' : 'text-zerodha-red'}`}>
+                    <span className={`ml-2 flex items-center ${portfolioSummary.pnl >= 0 ? 'text-bigbull-green' : 'text-bigbull-red'}`}>
                       {portfolioSummary.pnl > 0 ? (
                         <ArrowUpIcon className="h-4 w-4" />
                       ) : (
@@ -207,7 +222,7 @@ export default function Portfolio() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {portfolioSummary.holdings.map((holding) => (
                       <tr key={holding.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zerodha-blue">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-bigbull-blue">
                           <Link to={`/stocks/${holding.stock.id}`}>
                             {holding.stock.symbol}
                           </Link>
@@ -226,10 +241,10 @@ export default function Portfolio() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center">
-                            <span className={getProfit(holding) >= 0 ? 'text-zerodha-green' : 'text-zerodha-red'}>
+                            <span className={getProfit(holding) >= 0 ? 'text-bigbull-green' : 'text-bigbull-red'}>
                               ₹{getProfit(holding).toLocaleString()}
                             </span>
-                            <span className={`ml-2 ${getProfit(holding) >= 0 ? 'text-zerodha-green' : 'text-zerodha-red'}`}>
+                            <span className={`ml-2 ${getProfit(holding) >= 0 ? 'text-bigbull-green' : 'text-bigbull-red'}`}>
                               ({getProfit(holding) >= 0 ? '+' : ''}{getChangePercentage(holding)}%)
                             </span>
                           </div>
@@ -238,7 +253,7 @@ export default function Portfolio() {
                           ₹{getTotalValue(holding).toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link to={`/stocks/${holding.stock.id}`} className="text-zerodha-blue hover:text-blue-600 mr-4">
+                          <Link to={`/stocks/${holding.stock.id}`} className="text-bigbull-blue hover:text-blue-600 mr-4">
                             Trade
                           </Link>
                         </td>

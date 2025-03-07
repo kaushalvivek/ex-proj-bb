@@ -19,8 +19,8 @@ export default function Markets() {
   const [filteredStocks, setFilteredStocks] = useState<Stock[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedExchange, setSelectedExchange] = useState<string | 'all'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedExchange, setSelectedExchange] = useState('All');
   
   useEffect(() => {
     const fetchStocks = async () => {
@@ -46,8 +46,8 @@ export default function Markets() {
     // Filter stocks based on search query and selected exchange
     let result = stocks;
     
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    if (searchTerm) {
+      const query = searchTerm.toLowerCase();
       result = result.filter(
         (stock) =>
           stock.symbol.toLowerCase().includes(query) ||
@@ -55,60 +55,49 @@ export default function Markets() {
       );
     }
     
-    if (selectedExchange !== 'all') {
+    if (selectedExchange !== 'All') {
       result = result.filter((stock) => stock.exchange === selectedExchange);
     }
     
     setFilteredStocks(result);
-  }, [stocks, searchQuery, selectedExchange]);
+  }, [stocks, searchTerm, selectedExchange]);
   
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    setSearchTerm(e.target.value);
   };
   
   const handleExchangeChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setSelectedExchange(e.target.value);
   };
   
-  // Get unique exchanges for filter dropdown
-  const exchanges = ['all', ...new Set(stocks.map((stock) => stock.exchange))];
-  
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <h1 className="text-2xl font-bold text-zerodha-dark">Markets</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-bigbull-dark">Markets</h1>
         
-        {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                className="input pl-10"
-                placeholder="Search stocks by name or symbol"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-            </div>
-            
-            <div>
-              <select
-                className="input"
-                value={selectedExchange}
-                onChange={handleExchangeChange}
-              >
-                {exchanges.map((exchange) => (
-                  <option key={exchange} value={exchange}>
-                    {exchange === 'all' ? 'All Exchanges' : exchange}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Search and filter */}
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+          <div className="relative flex-1">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              className="input pl-10"
+              placeholder="Search stocks by name or symbol"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </div>
+          
+          <div className="w-full md:w-48">
+            <select
+              className="input w-full"
+              value={selectedExchange}
+              onChange={handleExchangeChange}
+            >
+              <option value="All">All Exchanges</option>
+              <option value="NSE">NSE</option>
+              <option value="BSE">BSE</option>
+            </select>
           </div>
         </div>
         
@@ -120,8 +109,8 @@ export default function Markets() {
         
         {loading ? (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-zerodha-blue border-t-transparent"></div>
-            <p className="mt-2 text-gray-500">Loading market data...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-bigbull-blue border-t-transparent"></div>
+            <p className="mt-2 text-gray-500">Loading stocks...</p>
           </div>
         ) : (
           <>
@@ -140,20 +129,20 @@ export default function Markets() {
                         Price
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Day High / Low
+                        Day Range
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Exchange
                       </th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
+                        Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredStocks.map((stock) => (
                       <tr key={stock.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zerodha-blue">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-bigbull-blue">
                           <Link to={`/stocks/${stock.id}`}>
                             {stock.symbol}
                           </Link>
@@ -171,7 +160,7 @@ export default function Markets() {
                           {stock.exchange}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link to={`/stocks/${stock.id}`} className="text-zerodha-blue hover:text-blue-600">
+                          <Link to={`/stocks/${stock.id}`} className="text-bigbull-blue hover:text-blue-600">
                             Trade
                           </Link>
                         </td>

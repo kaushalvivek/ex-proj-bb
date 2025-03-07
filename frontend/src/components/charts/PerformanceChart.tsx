@@ -24,6 +24,25 @@ ChartJS.register(
   Filler
 );
 
+interface Stock {
+  id: number;
+  symbol: string;
+  name: string;
+  current_price: number;
+}
+
+interface Transaction {
+  id: number;
+  user_id: number;
+  stock_id: number;
+  transaction_type: string;
+  quantity: number;
+  price: number;
+  total_amount: number;
+  timestamp: string;
+  stock: Stock;
+}
+
 interface Performance {
   daily: number;
   weekly: number;
@@ -33,12 +52,45 @@ interface Performance {
 }
 
 interface PerformanceChartProps {
-  performance: Performance;
+  transactions: Transaction[];
+  currentValue: number;
+  investedValue: number;
 }
 
-const PerformanceChart: FC<PerformanceChartProps> = ({ performance }) => {
+const PerformanceChart: FC<PerformanceChartProps> = ({ 
+  transactions, 
+  currentValue, 
+  investedValue 
+}) => {
   const [activeTimeframe, setActiveTimeframe] = useState<string>('monthly');
   const [chartData, setChartData] = useState<any>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<Performance>({
+    daily: 0,
+    weekly: 0,
+    monthly: 0,
+    yearly: 0,
+    overall: 0
+  });
+  
+  // Calculate performance metrics from transactions, currentValue, and investedValue
+  useEffect(() => {
+    // Calculate overall performance (P&L percentage)
+    const overallPerformance = investedValue > 0 
+      ? ((currentValue - investedValue) / investedValue) * 100 
+      : 0;
+    
+    // Generate estimated performance for different timeframes
+    // In a real app, this would use actual historical data
+    const performance: Performance = {
+      daily: overallPerformance * 0.01,   // Approx daily change
+      weekly: overallPerformance * 0.1,    // Approx weekly change
+      monthly: overallPerformance * 0.4,   // Approx monthly change
+      yearly: overallPerformance * 0.8,    // Approx yearly change
+      overall: overallPerformance          // Overall P&L
+    };
+    
+    setPerformanceMetrics(performance);
+  }, [transactions, currentValue, investedValue]);
   
   const generateRandomPerformanceData = (
     timeframe: string, 
@@ -92,6 +144,7 @@ const PerformanceChart: FC<PerformanceChartProps> = ({ performance }) => {
     return data;
   };
   
+  // Generate labels for the chart
   const generateLabels = (timeframe: string) => {
     const labels = [];
     let days;
@@ -155,10 +208,9 @@ const PerformanceChart: FC<PerformanceChartProps> = ({ performance }) => {
     return labels;
   };
   
+  // Generate chart data based on the active timeframe
   useEffect(() => {
-    if (!performance) return;
-    
-    const performanceValue = performance[activeTimeframe as keyof Performance];
+    const performanceValue = performanceMetrics[activeTimeframe as keyof Performance];
     const data = generateRandomPerformanceData(activeTimeframe, performanceValue);
     const labels = generateLabels(activeTimeframe);
     
@@ -182,7 +234,7 @@ const PerformanceChart: FC<PerformanceChartProps> = ({ performance }) => {
         },
       ],
     });
-  }, [performance, activeTimeframe]);
+  }, [performanceMetrics, activeTimeframe]);
   
   const options = {
     responsive: true,
@@ -235,7 +287,7 @@ const PerformanceChart: FC<PerformanceChartProps> = ({ performance }) => {
     },
   };
 
-  if (!performance || !chartData) {
+  if (!transactions.length || !chartData) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6 text-center">
         <h2 className="text-lg font-semibold mb-4">Performance</h2>
@@ -277,18 +329,18 @@ const PerformanceChart: FC<PerformanceChartProps> = ({ performance }) => {
         <div>
           <p className="text-sm text-gray-500">Current Value</p>
           <p className="text-xl font-semibold">
-            {(100 + performance[activeTimeframe as keyof Performance]).toFixed(2)}
+            {(100 + performanceMetrics[activeTimeframe as keyof Performance]).toFixed(2)}
           </p>
         </div>
         <div className={`text-right ${
-          performance[activeTimeframe as keyof Performance] >= 0 
+          performanceMetrics[activeTimeframe as keyof Performance] >= 0 
             ? 'text-bigbull-green' 
             : 'text-bigbull-red'
         }`}>
           <p className="text-sm">Change</p>
           <p className="text-xl font-semibold">
-            {performance[activeTimeframe as keyof Performance] >= 0 ? '+' : ''}
-            {performance[activeTimeframe as keyof Performance].toFixed(2)}%
+            {performanceMetrics[activeTimeframe as keyof Performance] >= 0 ? '+' : ''}
+            {performanceMetrics[activeTimeframe as keyof Performance].toFixed(2)}%
           </p>
         </div>
       </div>

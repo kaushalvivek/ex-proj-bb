@@ -33,4 +33,4 @@ async def root():
     return {"message": "Welcome to Zerodha Clone API. Visit /docs for API documentation."}
 
 if __name__ == "__main__":
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=True) 
+    uvicorn.run("backend.app.main:app", host="localhost", port=8000, reload=True) 
